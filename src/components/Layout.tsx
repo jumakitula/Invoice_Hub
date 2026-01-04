@@ -13,6 +13,9 @@ interface LayoutProps {
 
 export default function Layout({ currentView, onNavigate, user, children }: LayoutProps) {
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
+  const [subscription, setSubscription] = React.useState<any>(null);
+  const [plan, setPlan] = React.useState<any>(null);
+  const [usage, setUsage] = React.useState<any>(null);
 
   const navigation = [
     { name: 'Dashboard', href: 'dashboard', icon: BarChart3 },
@@ -38,12 +41,14 @@ export default function Layout({ currentView, onNavigate, user, children }: Layo
   }, [user]);
 
   const fetchSubscriptionData = async () => {
+    if (!user?.id) return;
+
     try {
       // Get subscription
       const { data: subData, error: subError } = await supabase
         .from('subscriptions')
         .select('*, subscription_plans(*)')
-        .eq('user_id', user?.id)
+        .eq('user_id', user.id as string)
         .order('created_at', { ascending: false })
         .limit(1)
         .single();
@@ -51,8 +56,8 @@ export default function Layout({ currentView, onNavigate, user, children }: Layo
       if (subError && subError.code !== 'PGRST116') throw subError;
 
       if (subData) {
-        setSubscription(subData);
-        setPlan(subData.subscription_plans);
+        setSubscription(subData as any);
+        setPlan((subData as any).subscription_plans);
       }
 
       // Get usage metrics for current month
@@ -63,14 +68,14 @@ export default function Layout({ currentView, onNavigate, user, children }: Layo
       const { data: usageData, error: usageError } = await supabase
         .from('usage_metrics')
         .select('*')
-        .eq('user_id', user?.id)
+        .eq('user_id', user.id as string)
         .eq('billing_period_start', currentPeriodStart.toISOString().split('T')[0])
         .single();
 
       if (usageError && usageError.code !== 'PGRST116') throw usageError;
 
       if (usageData) {
-        setUsage(usageData);
+        setUsage(usageData as any);
       } else {
         // No usage data yet, set defaults
         setUsage({ invoices_created: 0 });

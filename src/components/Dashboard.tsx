@@ -33,6 +33,7 @@ export function Dashboard({ onNavigate }: { onNavigate: (view: string, data?: an
     recentInvoices: [],
   });
   const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
     loadDashboardData();
@@ -48,18 +49,18 @@ export function Dashboard({ onNavigate }: { onNavigate: (view: string, data?: an
         `)
         .order('created_at', { ascending: false });
 
-      if (invoices) {
+      if (invoices && Array.isArray(invoices)) {
         const total = invoices.length;
-        const pending = invoices.filter(i => i.status === 'pending_approval').length;
-        const approved = invoices.filter(i => i.status === 'approved').length;
-        const rejected = invoices.filter(i => i.status === 'rejected').length;
-        const withIssues = invoices.filter(i => i.has_validation_issues).length;
-        const duplicates = invoices.filter(i => i.is_duplicate).length;
+        const pending = invoices.filter((i: any) => i.status === 'pending_approval').length;
+        const approved = invoices.filter((i: any) => i.status === 'approved').length;
+        const rejected = invoices.filter((i: any) => i.status === 'rejected').length;
+        const withIssues = invoices.filter((i: any) => i.has_validation_issues).length;
+        const duplicates = invoices.filter((i: any) => i.is_duplicate).length;
         const totalAmount = invoices
-          .filter(i => i.status === 'approved')
-          .reduce((sum, i) => sum + Number(i.total_amount), 0);
+          .filter((i: any) => i.status === 'approved')
+          .reduce((sum, i: any) => sum + Number(i.total_amount), 0);
 
-        const recentInvoices = invoices.slice(0, 5).map(inv => ({
+        const recentInvoices = invoices.slice(0, 5).map((inv: any) => ({
           id: inv.id,
           invoice_number: inv.invoice_number,
           supplier_name: (inv.suppliers as any)?.name || 'Unknown',
